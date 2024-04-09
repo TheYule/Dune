@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 bevy = "0.13.2"
+bevy_generative = "0.2.0"
