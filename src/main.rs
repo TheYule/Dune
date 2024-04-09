@@ -16,14 +16,12 @@ fn main() {
         .add_systems(Update, scene1_update.run_if(in_state::<SceneState>(SceneState::Scene1)))
         .add_systems(OnEnter(SceneState::Scene2), (cleanup, scene2_setup).chain())
         .add_systems(Update, scene2_update.run_if(in_state::<SceneState>(SceneState::Scene2)))
-        // .add_systems(OnEnter(SceneState::Scene2), (cleanup, scene2_setup).chain())
-        // .add_systems(Update, scene1_update.run_if(in_state::<SceneState>(SceneState::Scene1)))
-        // .add_systems(OnEnter(SceneState::Scene1), (cleanup, scene1_setup).chain())
-        // .add_systems(Update, scene1_update.run_if(in_state::<SceneState>(SceneState::Scene1)))
-        // .add_systems(OnEnter(SceneState::Scene1), (cleanup, scene1_setup).chain())
-        // .add_systems(Update, scene1_update.run_if(in_state::<SceneState>(SceneState::Scene1)))
-        // .add_systems(OnEnter(SceneState::Scene1), (cleanup, scene1_setup).chain())
-        // .add_systems(Update, scene1_update.run_if(in_state::<SceneState>(SceneState::Scene1)))
+        .add_systems(OnEnter(SceneState::Scene3), (cleanup, scene3_setup).chain())
+        .add_systems(Update, scene3_update.run_if(in_state::<SceneState>(SceneState::Scene3)))
+        .add_systems(OnEnter(SceneState::Scene4), (cleanup, scene4_setup).chain())
+        .add_systems(Update, scene4_update.run_if(in_state::<SceneState>(SceneState::Scene4)))
+        .add_systems(OnEnter(SceneState::Scene5), (cleanup, scene5_setup).chain())
+        .add_systems(Update, scene5_update.run_if(in_state::<SceneState>(SceneState::Scene5)))
         .run();
 }
 
