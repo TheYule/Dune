@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_generative::terrain::TerrainPlugin;
 use scenes::*;
 use states::SceneState;
 
@@ -9,7 +8,6 @@ mod states;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(TerrainPlugin)
         .init_state::<SceneState>()
         .add_systems(Startup, setup)
         .add_systems(OnEnter(SceneState::Scene1), scene1_setup)
@@ -28,8 +26,8 @@ fn main() {
 fn setup(mut commands: Commands) {
     commands.insert_resource(
         AmbientLight {
-            color: Color::ORANGE_RED,
-            brightness: 0.02,
+            color: Color::YELLOW,
+            brightness: 0.2
         }
     );
 }

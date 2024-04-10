@@ -1,7 +1,6 @@
 use std::f32::consts::FRAC_PI_2;
 
 use bevy::prelude::*;
-use bevy_generative::{noise::{Noise, Region}, terrain::{Terrain, TerrainBundle}};
 use super::states::SceneState;
 
 fn camera(commands: &mut Commands, transform: Transform, clear_color: ClearColorConfig) {
@@ -55,26 +54,13 @@ pub fn scene1_update(time: Res<Time>, mut query: Query<&mut Transform, With<Came
     }
 }
 
-pub fn scene2_setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut materials: ResMut<Assets<StandardMaterial>>) {
+pub fn scene2_setup(mut commands: Commands, assets: Res<AssetServer>, mut meshes: ResMut<Assets<Mesh>>, mut materials: ResMut<Assets<StandardMaterial>>) {
     camera(&mut commands, Transform::from_xyz(5., 3., 5.).looking_at(Vec3::ZERO, Vec3::Y), ClearColorConfig::Custom(Color::rgb(0.67843137254, 0.84705882352, 0.90196078431)));
     sun(&mut commands, Transform::from_xyz(200., 100., 100.).looking_at(Vec3::ZERO, Vec3::Y));
 
-    let mut noise = Noise::default();
-    noise.regions = vec![Region {
-        label: String::from("Desert"),
-        position: 0.,
-        color: [255, 255, 0, 255],
-    }];
-    noise.scale = 400.;
-
-    commands.spawn(TerrainBundle {
-        terrain: Terrain {
-            noise,
-            size: [10, 10],
-            sea_percent: 0.,
-            ..default()
-        },
-        ..default()
+    commands.spawn(SceneBundle {
+        scene: assets.load("desert1.glb#Scene0"),
+        ..Default::default()
     });
 
     commands.spawn((PbrBundle {
@@ -83,7 +69,7 @@ pub fn scene2_setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mu
             base_color: Color::GRAY,
             ..default()
         }),
-        transform: Transform::from_xyz(-5., 0.5, 5.),
+        transform: Transform::from_xyz(-5., 0., 5.),
         ..default()
     }, Character));
 }
@@ -91,33 +77,19 @@ pub fn scene2_setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mu
 pub fn scene2_update(time: Res<Time>, mut query: Query<&mut Transform, With<Character>>, mut next_state: ResMut<NextState<SceneState>>) {
     if time.elapsed_seconds() < 28. {
         let mut transform = query.single_mut();
-        transform.translation += Vec3::from_array([1., 0.05, -1.]) * time.delta_seconds();
+        transform.translation += Vec3::from_array([1., 0., -1.]) * time.delta_seconds();
     } else {
         next_state.set(SceneState::Scene3);
     }
 }
 
-pub fn scene3_setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut materials: ResMut<Assets<StandardMaterial>>) {
+pub fn scene3_setup(mut commands: Commands, assets: Res<AssetServer>, mut meshes: ResMut<Assets<Mesh>>, mut materials: ResMut<Assets<StandardMaterial>>) {
     camera(&mut commands, Transform::from_xyz(5., 3., 5.).looking_at(Vec3::ZERO, Vec3::Y), ClearColorConfig::Custom(Color::rgb(0.67843137254, 0.84705882352, 0.90196078431)));
     sun(&mut commands, Transform::from_xyz(200., 100., 100.).looking_at(Vec3::ZERO, Vec3::Y));
 
-    let mut noise = Noise::default();
-    noise.seed = 1;
-    noise.regions = vec![Region {
-        label: String::from("Desert"),
-        position: 0.,
-        color: [255, 255, 0, 255],
-    }];
-    noise.scale = 400.;
-
-    commands.spawn(TerrainBundle {
-        terrain: Terrain {
-            noise,
-            size: [10, 10],
-            sea_percent: 0.,
-            ..default()
-        },
-        ..default()
+    commands.spawn(SceneBundle {
+        scene: assets.load("desert2.glb#Scene0"),
+        ..Default::default()
     });
 
     commands.spawn((PbrBundle {
@@ -130,26 +102,47 @@ pub fn scene3_setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mu
         transform: Transform::from_xyz(0., 1., 0.),
         ..default()
     }, Character));
+
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(Cylinder::new(0.25, 1.)),
+        material: materials.add(StandardMaterial {
+            base_color: Color::DARK_GRAY,
+            metallic: 1.,
+            ..default()
+        }),
+        transform: Transform::from_xyz(3., 1., 0.),
+        ..default()
+    });
+
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(Cylinder::new(0.25, 1.)),
+        material: materials.add(StandardMaterial {
+            base_color: Color::DARK_GRAY,
+            metallic: 1.,
+            ..default()
+        }),
+        transform: Transform::from_xyz(0., 1., 3.),
+        ..default()
+    });
 }
 
 pub fn scene3_update(time: Res<Time>, mut query: Query<&mut Transform, With<Character>>, mut next_state: ResMut<NextState<SceneState>>) {
     if time.elapsed_seconds() < 39. {
         let mut transform = query.single_mut();
-        transform.translation += Vec3::from_array([0., 0.025, 0.]) * time.delta_seconds();
-    } else if time.elapsed_seconds() < 46. {
-        let mut transform = query.single_mut();
-        transform.translation -= Vec3::from_array([0., 0.025, 0.]) * time.delta_seconds();
+        let x = time.elapsed_seconds() - 39.;
+
+        transform.translation += Vec3::from_array([0., x.sin() / 2., 0.]) * time.delta_seconds();
     } else {
         next_state.set(SceneState::Scene4);
     }
 }
 
 pub fn scene4_setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut materials: ResMut<Assets<StandardMaterial>>) {
-    camera(&mut commands, Transform::from_xyz(5., 3., 5.).looking_at(Vec3::ZERO, Vec3::Y), ClearColorConfig::Custom(Color::RED));
+    camera(&mut commands, Transform::from_xyz(5., 3., 5.).looking_at(Vec3::ZERO, Vec3::Y), ClearColorConfig::Custom(Color::ORANGE_RED));
     sun(&mut commands, Transform::from_xyz(200., 100., 100.).looking_at(Vec3::ZERO, Vec3::Y));
 
     commands.spawn(PbrBundle {
-        mesh: meshes.add(Circle::new(5.)),
+        mesh: meshes.add(Circle::new(5.).mesh().resolution(32)),
         material: materials.add(StandardMaterial {
             base_color: Color::YELLOW,
             ..default()
@@ -174,7 +167,7 @@ pub fn scene4_setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mu
             base_color: Color::DARK_GRAY,
             ..default()
         }),
-        transform: Transform::from_xyz(0., 2., 0.),
+        transform: Transform::from_xyz(0., 2.25, 0.),
         ..default()
     });
 }
@@ -188,27 +181,13 @@ pub fn scene4_update(time: Res<Time>, mut query: Query<&mut Transform, With<Came
     }
 }
 
-pub fn scene5_setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut materials: ResMut<Assets<StandardMaterial>>) {
+pub fn scene5_setup(mut commands: Commands, assets: Res<AssetServer>, mut meshes: ResMut<Assets<Mesh>>, mut materials: ResMut<Assets<StandardMaterial>>) {
     camera(&mut commands, Transform::from_xyz(5., 3., 5.).looking_at(Vec3::ZERO, Vec3::Y), ClearColorConfig::Custom(Color::rgb(0.67843137254, 0.84705882352, 0.90196078431)));
     sun(&mut commands, Transform::from_xyz(200., 100., 100.).looking_at(Vec3::ZERO, Vec3::Y));
 
-    let mut noise = Noise::default();
-    noise.seed = 2;
-    noise.regions = vec![Region {
-        label: String::from("Desert"),
-        position: 0.,
-        color: [255, 255, 0, 255],
-    }];
-    noise.scale = 400.;
-
-    commands.spawn(TerrainBundle {
-        terrain: Terrain {
-            noise,
-            size: [10, 10],
-            sea_percent: 0.,
-            ..default()
-        },
-        ..default()
+    commands.spawn(SceneBundle {
+        scene: assets.load("desert3.glb#Scene0"),
+        ..Default::default()
     });
 
     commands.spawn((PbrBundle {
@@ -217,7 +196,7 @@ pub fn scene5_setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mu
             base_color: Color::GRAY,
             ..default()
         }),
-        transform: Transform::from_xyz(5., 0.75, -5.),
+        transform: Transform::from_xyz(5., 0., -5.),
         ..default()
     }, Character));
 }
@@ -225,6 +204,6 @@ pub fn scene5_setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mu
 pub fn scene5_update(time: Res<Time>, mut query: Query<&mut Transform, With<Character>>) {
     if time.elapsed_seconds() < 63. {
         let mut transform = query.single_mut();
-        transform.translation -= Vec3::from_array([1., 0.05, -1.]) * time.delta_seconds();
+        transform.translation -= Vec3::from_array([1., 0., -1.]) * time.delta_seconds();
     }
 }
